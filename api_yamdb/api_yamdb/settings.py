@@ -108,9 +108,32 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination'
+    ,
+    'PAGE_SIZE': 10, #  Пагинация по умолчанию
 }
 
-SIMPLE_JWT = {'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+SIMPLE_JWT = {'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
               'AUTH_HEADER_TYPES': ('Bearer',), }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'reviews.User'
+
+# Роли пользователей
+MODERATOR = 'moderator'
+USER = 'user'
+ADMIN = 'admin'
+
+USER_ROLE_CHOICES = (
+      (MODERATOR, 'moderator'),
+      (USER, 'user'),
+      (ADMIN, 'admin'),
+  )
+
+# Отправка email
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD ')
+EMAIL_PORT = 587
