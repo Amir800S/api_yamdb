@@ -22,9 +22,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',
     'rest_framework',
+    'djoser',
     'api',
     'reviews',
-    'djoser',
+
 ]
 
 MIDDLEWARE = [
