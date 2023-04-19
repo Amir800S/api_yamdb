@@ -1,28 +1,22 @@
+from http import HTTPStatus
+
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, filters
-from rest_framework import viewsets
-from rest_framework.pagination import LimitOffsetPagination
-from reviews.models import Category, Genre, Title
-from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
+from rest_framework import filters, viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-
-from http import HTTPStatus
+from reviews.models import Category, Genre, Title, User
 
 from .permissions import IsAdmin
-from .serializers import (
-    UserSerializer,
-    TokenConfirmationSerializer,
-    RegistrationSerializer, AdminSerializer,
-    CategorySerializer, GenreSerializer, TitleSerializer
-)
-from reviews.models import User, Category, Genre, Title
+from .serializers import (AdminSerializer, CategorySerializer, GenreSerializer,
+                          RegistrationSerializer, TitleSerializer,
+                          TokenConfirmationSerializer, UserSerializer)
 
 
 class UserCreation(APIView):
