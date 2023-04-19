@@ -49,7 +49,7 @@ class UserCreation(APIView):
             return Response({
                 'username': signed_user.username,
                 'email': signed_user.email
-            }, status=HTTPStatus.OK, )
+            }, status=HTTPStatus.OK)
         return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
 
 
@@ -61,7 +61,7 @@ class JWTTokenConfirmation(APIView):
         serializer.is_valid()
         user_data = serializer.validated_data
         current_user = get_object_or_404(
-            User, confirmation_code=user_data['confirmation_code']
+            User, confirmation_code=user_data.get('confirmation_code')
         )
         if user_data['confirmation_code'] == current_user.confirmation_code:
             refreshed_token = RefreshToken.for_user(current_user)
