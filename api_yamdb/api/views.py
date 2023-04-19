@@ -1,8 +1,7 @@
 from django.conf import settings
 from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, filters
-from rest_framework import viewsets
+from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
@@ -38,19 +37,16 @@ class UserCreation(APIView):
 
     def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
-        if serializer.is_valid():
-            signed_user = serializer.save()
-            user_data = {
-                'subject': f'Код подтверждения для {signed_user.username}',
-                'message': f'{signed_user.confirmation_code}',
-                'to_email': signed_user.email
-            }
-            self.send_participation_code(user_data)
-            return Response({
-                'username': signed_user.username,
-                'email': signed_user.email
-            }, status=HTTPStatus.OK)
-        return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        signed_user = serializer.save()
+        user_data = {
+            'subject': f'Код подтверждения для {signed_user.username}',
+            'message': f'{signed_user.confirmation_code}',
+            'to_email': signed_user.email
+        }
+        self.send_participation_code(user_data)
+        return Response(serializer.data, status=HTTPStatus.OK)
+
 
 
 class JWTTokenConfirmation(APIView):
