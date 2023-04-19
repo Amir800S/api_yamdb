@@ -58,10 +58,10 @@ class JWTTokenConfirmation(APIView):
     permission_classes = (AllowAny, )
     def post(self, request):
         serializer = TokenConfirmationSerializer(data=request.data)
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         user_data = serializer.validated_data
         current_user = get_object_or_404(
-            User, confirmation_code=user_data.get('confirmation_code')
+            User, username=user_data.get('username'),
         )
         if user_data['confirmation_code'] == current_user.confirmation_code:
             refreshed_token = RefreshToken.for_user(current_user)
@@ -73,7 +73,6 @@ class JWTTokenConfirmation(APIView):
             status=HTTPStatus.BAD_REQUEST
         )
 
-
 class UserViewSet(viewsets.ModelViewSet):
     """Вьюсет Users."""
     queryset = User.objects.all()
@@ -81,6 +80,7 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     lookup_field = 'username'
+    http_method_names = ('patch', 'post', 'get', 'head', 'delete',)
     permission_classes = (IsAuthenticated, IsAdmin)
     pagination_class = LimitOffsetPagination
 

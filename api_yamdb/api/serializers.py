@@ -31,7 +31,6 @@ class AdminSerializer(serializers.ModelSerializer):
             'email',
             'first_name',
             'last_name',
-            'confirmation_code',
             'bio',
             'role'
         )
@@ -45,7 +44,6 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'last_name',
             'first_name',
-            'confirmation_code',
             'role',
             'bio',
         )

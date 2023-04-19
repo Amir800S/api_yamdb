@@ -87,6 +87,12 @@ class User(AbstractUser):
         unique=True,
         blank=False,
     )
+    role = models.CharField(
+        'Статус пользователя',
+        max_length=15,
+        choices=settings.USER_ROLE_CHOICES,
+        default=settings.USER,
+    )
     first_name = models.CharField(
         max_length=150,
         blank=True,
@@ -99,12 +105,6 @@ class User(AbstractUser):
         'Биография',
         max_length=200,
         blank=True
-    )
-    role = models.CharField(
-        'Статус пользователя',
-        max_length=15,
-        choices=settings.USER_ROLE_CHOICES,
-        default=settings.USER,
     )
     confirmation_code = models.CharField(
         max_length=255,
