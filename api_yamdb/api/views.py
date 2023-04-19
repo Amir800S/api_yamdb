@@ -2,9 +2,11 @@ from django.conf import settings
 from django.core.mail import EmailMessage
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, filters
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -15,9 +17,10 @@ from .permissions import IsAdmin
 from .serializers import (
     UserSerializer,
     TokenConfirmationSerializer,
-    RegistrationSerializer, AdminSerializer
+    RegistrationSerializer, AdminSerializer,
+    CategorySerializer, GenreSerializer, TitleSerializer
 )
-from reviews.models import User
+from reviews.models import User, Category, Genre, Title
 
 
 class UserCreation(APIView):
@@ -95,3 +98,21 @@ class UserViewSet(viewsets.ModelViewSet):
                 serializer.save()
                 return Response(serializer.data, status=HTTPStatus.OK)
             return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
+            
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = CategorySerializer
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = GenreSerializer
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+    serializer_class = TitleSerializer
+
