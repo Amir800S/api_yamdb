@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from reviews.models import Category, Genre, Title, User
 
@@ -22,6 +23,7 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Title
 
+
 class AdminSerializer(serializers.ModelSerializer):
     """Сериалайзер для админа: Все поля редактируемы."""
     class Meta:
@@ -34,6 +36,7 @@ class AdminSerializer(serializers.ModelSerializer):
             'bio',
             'role'
         )
+
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериалайзер простого юзера: Невозможно поменять роль."""
@@ -49,6 +52,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('role',)
 
+
 class TokenConfirmationSerializer(serializers.ModelSerializer):
     """Сериалайзер токена."""
     username = serializers.CharField(required=True)
@@ -61,12 +65,16 @@ class TokenConfirmationSerializer(serializers.ModelSerializer):
             'confirmation_code'
         )
 
+
 class RegistrationSerializer(serializers.ModelSerializer):
     """Сериалайзер для регистрации пользователя."""
     class Meta:
         model = User
         fields = (
             'username',
-            'email'
+            'email',
+            'confirmation_code'
         )
+
+
 

@@ -1,9 +1,9 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from .validators import valid_year 
-from api.validators import validate_username, validate_regex_username
 
+from .validators import valid_year
+from api.validators import validate_username, validate_regex_username
 
 
 class Category(models.Model):
@@ -78,7 +78,8 @@ class User(AbstractUser):
         unique=True,
         validators=(
             validate_username,
-            validate_regex_username ),
+            validate_regex_username
+        ),
     )
     email = models.EmailField(
         'Email',
@@ -108,11 +109,12 @@ class User(AbstractUser):
     )
     confirmation_code = models.CharField(
         max_length=255,
-        default='not defined yet'
+        default='not defined yet',
+        blank=True
     )
 
     def __str__(self):
         return 'Пользователь - {}'.format(self.username)
+
     class Meta:
         verbose_name_plural = 'Пользователи'
-
