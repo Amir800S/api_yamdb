@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-UserCreation, JWTTokenConfirmation, UserViewSet
+UserCreation, JWTTokenConfirmation, UserViewSet,
 CategoryViewSet, GenreViewSet, TitleViewSet)
 
 router_v1 = DefaultRouter()
@@ -18,5 +18,6 @@ urlpatterns= [
          name='signup'),
     path('v1/auth/token/', JWTTokenConfirmation.as_view(),
          name='get_token'),
+     path('', include('ratings.urls')),
 ]
 

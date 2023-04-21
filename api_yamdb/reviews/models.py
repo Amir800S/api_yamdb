@@ -115,4 +115,3 @@ class User(AbstractUser):
         return 'Пользователь - {}'.format(self.username)
     class Meta:
         verbose_name_plural = 'Пользователи'
-

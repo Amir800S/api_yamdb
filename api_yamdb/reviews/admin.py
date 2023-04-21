@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import User
+from .models import User, Title, Genre, Category
 
 
 class UserAdmin(admin.ModelAdmin):
@@ -17,3 +17,6 @@ class UserAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 admin.site.register(User, UserAdmin)
+admin.site.register(Title)
+admin.site.register(Genre)
+admin.site.register(Category)
