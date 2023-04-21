@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from .validators import valid_year
-from api.validators import validate_username, validate_regex_username
+from api.validators import validate_regex_username
 
 
 class Category(models.Model):
@@ -76,10 +76,7 @@ class User(AbstractUser):
         null=False,
         blank=False,
         unique=True,
-        validators=(
-            validate_username,
-            validate_regex_username
-        ),
+        validators=(validate_regex_username, )
     )
     email = models.EmailField(
         'Email',

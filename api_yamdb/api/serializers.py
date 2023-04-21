@@ -1,6 +1,7 @@
-from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from reviews.models import Category, Genre, Title, User
+
+from .validators import validate_username, validate_regex_username
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -40,6 +41,9 @@ class AdminSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериалайзер простого юзера: Невозможно поменять роль."""
+    username = serializers.CharField(required=True, max_length=150,
+                                     validators=[validate_regex_username])
+
     class Meta:
         model = User
         fields = (
@@ -66,15 +70,26 @@ class TokenConfirmationSerializer(serializers.ModelSerializer):
         )
 
 
-class RegistrationSerializer(serializers.ModelSerializer):
+class RegistrationSerializer(serializers.Serializer):
     """Сериалайзер для регистрации пользователя."""
+    email = serializers.EmailField(required=True, max_length=254,)
+    username = serializers.CharField(required=True, max_length=150,
+                                     validators=(validate_username,
+                                                 validate_regex_username))
+
+    def validate(self, data):
+        """Валидация целиком и отдельно по полям."""
+        if not User.objects.filter(
+            username=data['username'], email=data['email']
+        ):
+            if User.objects.filter(username=data['username']):
+                raise serializers.ValidationError('Никнейм уже существует!')
+            if User.objects.filter(email=data['email']):
+                raise serializers.ValidationError('Email уже существует!')
+        return data
+
     class Meta:
-        model = User
         fields = (
             'username',
             'email',
-            'confirmation_code'
         )
-
-
-
