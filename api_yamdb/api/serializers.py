@@ -74,8 +74,9 @@ class RegistrationSerializer(serializers.Serializer):
     """Сериалайзер для регистрации пользователя."""
     email = serializers.EmailField(required=True, max_length=254,)
     username = serializers.CharField(required=True, max_length=150,
-                                     validators=(validate_username,
-                                                 validate_regex_username))
+                                     validators=(
+                                         validate_username,
+                                         validate_regex_username))
 
     def validate(self, data):
         """Валидация целиком и отдельно по полям."""
