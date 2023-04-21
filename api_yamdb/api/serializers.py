@@ -42,7 +42,7 @@ class AdminSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """Сериалайзер простого юзера: Невозможно поменять роль."""
     username = serializers.CharField(required=True, max_length=150,
-                                     validators=[validate_regex_username])
+                                     validators=(validate_regex_username, ))
 
     class Meta:
         model = User
