@@ -1,8 +1,14 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views import (CategoryViewSet, GenreViewSet, JWTTokenConfirmation,
-                    TitleViewSet, UserCreation, UserViewSet)
+from .views import (
+    UserCreation,
+    JWTTokenConfirmation,
+    UserViewSet,
+    CategoryViewSet,
+    GenreViewSet,
+    TitleViewSet,
+)
 
 router_v1 = DefaultRouter()
 
@@ -16,5 +22,5 @@ urlpatterns = [
     path('v1/auth/signup/', UserCreation.as_view(),
          name='signup'),
     path('v1/auth/token/', JWTTokenConfirmation.as_view(),
-         name='get_token'),
+         name='token'),
 ]
