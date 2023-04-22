@@ -1,13 +1,13 @@
 from rest_framework import serializers
 from reviews.models import Category, Genre, Title, User
 
-from .validators import validate_username, validate_regex_username
+from .validators import validate_regex_username, validate_username
 
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        exclude = ('id', )
         lookup_field = "slug"
         model = Category
 
@@ -15,7 +15,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        exclude = ('id', )
         lookup_field = "slug"
         model = Genre
 
@@ -25,6 +25,28 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Title
+
+
+class TitleReadSerializer(serializers.ModelSerializer):
+    """Сериализатор объектов класса Title при GET-запросе."""
+
+    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Title
+
+
+class TitleWriteSerializer(TitleReadSerializer):
+    """Сериализатор объектов класса Title при небезопасных запросах."""
+
+    genre = serializers.SlugRelatedField(queryset=Genre.objects.all(),
+                                         slug_field='slug',
+                                         many=True)
+    category = serializers.SlugRelatedField(queryset=Category.objects.all(),
+                                            slug_field='slug',
+                                            )
 
 
 class AdminSerializer(serializers.ModelSerializer):

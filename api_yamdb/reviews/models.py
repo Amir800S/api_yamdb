@@ -1,9 +1,9 @@
+from api.validators import validate_regex_username
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 from .validators import valid_year
-from api.validators import validate_regex_username
 
 
 class Category(models.Model):
@@ -20,8 +20,13 @@ class Category(models.Model):
         verbose_name='Slug категории',
     )
 
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        ordering = ('name',)
+
     def __str__(self):
-        return self.name
+        return self.slug
 
 
 class Genre(models.Model):
@@ -38,8 +43,12 @@ class Genre(models.Model):
         verbose_name='Slug жанра',
     )
 
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+
     def __str__(self):
-        return self.name
+        return self.slug
 
 
 class Title(models.Model):
@@ -67,6 +76,13 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Категория произведения',)
 
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+
+    def __str__(self):
+        return self.name
+
 
 class TitleGenre(models.Model):
     """Вспомогательная таблица многое-ко-многим - произведения и жанры."""
@@ -79,6 +95,10 @@ class TitleGenre(models.Model):
         on_delete=models.CASCADE,
         verbose_name='Жанр'
     )
+
+    class Meta:
+        verbose_name = 'Соответствие жанра и произведения'
+        ordering = ('id',)
 
     def __str__(self):
         return f'{self.title}-{self.genre}'

@@ -1,11 +1,8 @@
 import csv
 
-from django.db import IntegrityError
-
-from reviews.models import User
 from django.core.management.base import BaseCommand, CommandError
-from reviews.models import Category, Genre, Title, TitleGenre
-
+from django.db import IntegrityError
+from reviews.models import Category, Genre, Title, TitleGenre, User
 
 from api_yamdb.settings import BASE_DIR
 
