@@ -68,6 +68,22 @@ class Title(models.Model):
         verbose_name='Категория произведения',)
 
 
+class TitleGenre(models.Model):
+    """Вспомогательная таблица многое-ко-многим - произведения и жанры."""
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name='Произведение',)
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE,
+        verbose_name='Жанр'
+    )
+
+    def __str__(self):
+        return f'{self.title}-{self.genre}'
+
+
 class User(AbstractUser):
     """Модель пользователя."""
     username = models.CharField(
