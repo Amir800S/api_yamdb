@@ -85,7 +85,7 @@ http://127.0.0.1:8000/api/v1/auth/token/
   "token": "string"
 }
 ```
-## ***Над проектом работали***
-### [*Амир Сосламбеков*](https://github.com/Amir800S) 
-### [*Нурбек Орозалиев*](https://github.com/Nurbek878) 
-### [*Михаил Ашин* ](https://github.com/MichaelAshin)
+## ***Над проектом работали:***
+### ●[*Амир Сосламбеков*](https://github.com/Amir800S) 
+### ●[*Нурбек Орозалиев*](https://github.com/Nurbek878) 
+### ●[*Михаил Ашин* ](https://github.com/MichaelAshin)
