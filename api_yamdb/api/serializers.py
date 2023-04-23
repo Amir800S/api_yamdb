@@ -46,14 +46,14 @@ class TitleSerializer(serializers.ModelSerializer):
         )
         model = Title
         read_only_fields = ('rating',)
-    
+
     def get_rating(self, obj):
         reviews = Review.objects.filter(title_id=obj.id)
         scores = []
         for review in reviews:
             scores.append(review.score)
         if len(scores) > 0:
-            return mean(scores)  
+            return mean(scores)
         else:
             return 0
 
