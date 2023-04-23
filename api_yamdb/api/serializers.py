@@ -20,13 +20,6 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-class TitleSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        fields = '__all__'
-        model = Title
-
-
 class TitleReadSerializer(serializers.ModelSerializer):
     """Сериализатор объектов класса Title при GET-запросе."""
 

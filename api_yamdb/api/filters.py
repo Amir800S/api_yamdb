@@ -3,7 +3,7 @@ from reviews.models import Title
 
 
 class TitleFilter(filters.FilterSet):
-    """Выборка произведений по полям."""
+    """Фильтр произведений по полям."""
 
     category = filters.CharFilter(
         field_name='category__slug',
