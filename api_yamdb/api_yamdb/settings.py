@@ -25,7 +25,6 @@ INSTALLED_APPS = [
     'djoser',
     'api',
     'reviews',
-    'ratings',
 ]
 
 MIDDLEWARE = [
@@ -109,9 +108,8 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination'
-    ,
-    'PAGE_SIZE': 10, #  Пагинация по умолчанию
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,  # Пагинация по умолчанию
 }
 
 SIMPLE_JWT = {'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
@@ -127,10 +125,10 @@ USER = 'user'
 ADMIN = 'admin'
 
 USER_ROLE_CHOICES = (
-      (MODERATOR, 'moderator'),
-      (USER, 'user'),
-      (ADMIN, 'admin'),
-  )
+    (MODERATOR, 'moderator'),
+    (USER, 'user'),
+    (ADMIN, 'admin'),
+)
 
 # Отправка email
 EMAIL_USE_TLS = True

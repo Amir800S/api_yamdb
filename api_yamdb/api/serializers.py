@@ -1,5 +1,9 @@
+from statistics import mean
+
 from rest_framework import serializers
-from reviews.models import Category, Genre, Title, User
+from reviews.models import Category, Comment, Genre, Review, Title, User
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -17,10 +21,42 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all(),
+        required=False
+    )
+
+    genre = serializers.SlugRelatedField(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        required=True
+    )
+    rating = serializers.SerializerMethodField()
 
     class Meta:
-        fields = '__all__'
+        fields = (
+            'id',
+            'name',
+            'year',
+            'rating',
+            'description',
+            'genre',
+            'category'
+        )
         model = Title
+        read_only_fields = ('rating',)
+    
+    def get_rating(self, obj):
+        reviews = Review.objects.filter(title_id=obj.id)
+        scores = []
+        for review in reviews:
+            scores.append(review.score)
+        if len(scores) > 0:
+            return mean(scores)  
+        else:
+            return 0
+
 
 class AdminSerializer(serializers.ModelSerializer):
     """Сериалайзер для админа: Все поля редактируемы."""
@@ -35,6 +71,7 @@ class AdminSerializer(serializers.ModelSerializer):
             'bio',
             'role'
         )
+
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериалайзер простого юзера: Невозможно поменять роль."""
@@ -51,6 +88,7 @@ class UserSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('role',)
 
+
 class TokenConfirmationSerializer(serializers.ModelSerializer):
     """Сериалайзер токена."""
     username = serializers.CharField(required=True)
@@ -63,6 +101,7 @@ class TokenConfirmationSerializer(serializers.ModelSerializer):
             'confirmation_code'
         )
 
+
 class RegistrationSerializer(serializers.ModelSerializer):
     """Сериалайзер для регистрации пользователя."""
     class Meta:
@@ -72,3 +111,46 @@ class RegistrationSerializer(serializers.ModelSerializer):
             'email'
         )
 
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all(),
+        required=False
+    )
+
+    class Meta:
+        model = Comment
+        fields = '__all__'
+        read_only_fields = ['id', 'author', 'review', 'pub_date']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    title = serializers.SlugRelatedField(
+        slug_field='name',
+        queryset=Title.objects.all(),
+        required=False
+    )
+
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all(),
+        default=None
+    )
+
+    class Meta:
+        model = Review
+        fields = '__all__'
+        read_only_fields = ['id', 'author', 'title', 'pub_date']
+
+    def validate_author(self, value):
+        request = self.context.get("request")
+        title = get_object_or_404(
+            Title,
+            id=int(self.context.get("view").kwargs.get('title_id'))
+        )
+        if request and hasattr(request, "user"):
+            user = request.user
+        if Review.objects.filter(author=user, title=title).exists():
+            raise ValidationError("Вы уже оставили отзыв на это произведение.")
+        return value
