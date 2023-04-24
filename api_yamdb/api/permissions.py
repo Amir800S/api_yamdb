@@ -2,6 +2,7 @@ from rest_framework import permissions
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
+    """Проверка на права доступа для Админа или только для чтения."""
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -24,6 +25,7 @@ class IsAdmin(permissions.BasePermission):
 
 
 class IsAuthorOrModeratorOrReadOnly(permissions.BasePermission):
+    """Проверка на права доступа для Модератора или Автора."""
     message = 'Пользователь не является автором.'
     safe_actions = ['list', 'create', 'retrieve']
 
