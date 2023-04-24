@@ -8,23 +8,33 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly
+)
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Title, User
 
+from reviews.models import User, Category, Comment, Genre, Review, Title
 from .filters import TitleFilter
 from .mixins import ListCreateDeleteViewSet
-from .permissions import IsAdmin, IsAdminOrReadOnly
+from .permissions import (
+    IsAdmin,
+    IsAdminOrReadOnly,
+    IsAuthorOrModeratorOrReadOnly
+)
 from .serializers import (AdminSerializer, CategorySerializer, GenreSerializer,
                           RegistrationSerializer, TitleReadSerializer,
                           TitleWriteSerializer, TokenConfirmationSerializer,
-                          UserSerializer)
+                          UserSerializer, CommentSerializer, ReviewSerializer)
 
 
 class UserCreation(APIView):
     """Вьюсет создания юзера и отправки сообщения на почту"""
+
     @staticmethod
     def send_participation_code(user_data):
         message = EmailMessage(
@@ -59,6 +69,7 @@ class UserCreation(APIView):
 
 class JWTTokenConfirmation(APIView):
     """Создание JWT токена через код пользователя"""
+
     def post(self, request):
         serializer = TokenConfirmationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -117,6 +128,10 @@ class CategoryViewSet(ListCreateDeleteViewSet):
         category.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def delete(self, request, pk, format=None):
+        category = self.model.objects.get(category_id=pk, user=request.user)
+        category.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class GenreViewSet(ListCreateDeleteViewSet):
     queryset = Genre.objects.all()
@@ -144,3 +159,46 @@ class TitleViewSet(viewsets.ModelViewSet):
         if self.request.method in ['POST', 'PATCH']:
             return TitleWriteSerializer
         return TitleReadSerializer
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsAuthorOrModeratorOrReadOnly
+    ]
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        title = get_object_or_404(Title, id=int(self.kwargs.get('title_id')))
+        queryset = Review.objects.filter(title_id=title.id)
+        return queryset
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, id=int(self.kwargs.get('title_id')))
+        user = get_object_or_404(User, username=self.request.user.username)
+        serializer.save(author=user, title_id=title.id)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        IsAuthorOrModeratorOrReadOnly
+    ]
+    pagination_class = LimitOffsetPagination
+
+    def get_queryset(self):
+        review = get_object_or_404(
+            Review,
+            id=int(self.kwargs.get('review_id'))
+        )
+        queryset = Comment.objects.filter(review_id=review.id)
+        return queryset
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(
+            Review,
+            id=int(self.kwargs.get('review_id'))
+        )
+        serializer.save(author=self.request.user, review_id=review.id)

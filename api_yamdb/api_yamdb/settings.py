@@ -26,7 +26,6 @@ INSTALLED_APPS = [
     'djoser',
     'api',
     'reviews',
-
 ]
 
 MIDDLEWARE = [
@@ -123,13 +122,15 @@ MODERATOR = 'moderator'
 USER = 'user'
 ADMIN = 'admin'
 
-USER_ROLE_CHOICES = ((MODERATOR, 'moderator'),
-                     (USER, 'user'),
-                     (ADMIN, 'admin'),)
+USER_ROLE_CHOICES = (
+    (MODERATOR, 'moderator'),
+    (USER, 'user'),
+    (ADMIN, 'admin'),
+)
 
 # Отправка email
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD ')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587

@@ -1,5 +1,11 @@
+from statistics import mean
+
 from rest_framework import serializers
-from reviews.models import Category, Genre, Title, User
+from reviews.models import Category, Comment, Genre, Review, Title, User
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
+
+from .validators import validate_regex_username, validate_username
 
 from .validators import validate_regex_username, validate_username
 
@@ -25,10 +31,43 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
+    rating = serializers.SerializerMethodField()
 
     class Meta:
-        fields = '__all__'
+        fields = (
+            'id',
+            'name',
+            'year',
+            'rating',
+            'description',
+            'genre',
+            'category'
+        )
         model = Title
+        read_only_fields = ('rating',)
+
+    def get_rating(self, obj):
+        reviews = Review.objects.filter(title_id=obj.id)
+        scores = []
+        for review in reviews:
+            scores.append(review.score)
+        if len(scores) > 0:
+            return mean(scores)
+        else:
+            return 0
+
+
+
+class TitleWriteSerializer(TitleReadSerializer):
+    """Сериализатор объектов класса Title при небезопасных запросах."""
+
+    genre = serializers.SlugRelatedField(queryset=Genre.objects.all(),
+                                         slug_field='slug',
+                                         many=True)
+    category = serializers.SlugRelatedField(queryset=Category.objects.all(),
+                                            slug_field='slug',
+                                            )
+
 
 
 class TitleWriteSerializer(TitleReadSerializer):
@@ -111,3 +150,47 @@ class RegistrationSerializer(serializers.Serializer):
             'username',
             'email',
         )
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all(),
+        required=False
+    )
+
+    class Meta:
+        model = Comment
+        fields = '__all__'
+        read_only_fields = ['id', 'author', 'review', 'pub_date']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    title = serializers.SlugRelatedField(
+        slug_field='name',
+        queryset=Title.objects.all(),
+        required=False
+    )
+
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all(),
+        default=None
+    )
+
+    class Meta:
+        model = Review
+        fields = '__all__'
+        read_only_fields = ['id', 'author', 'title', 'pub_date']
+
+    def validate_author(self, value):
+        request = self.context.get("request")
+        title = get_object_or_404(
+            Title,
+            id=int(self.context.get("view").kwargs.get('title_id'))
+        )
+        if request and hasattr(request, "user"):
+            user = request.user
+        if Review.objects.filter(author=user, title=title).exists():
+            raise ValidationError("Вы уже оставили отзыв на это произведение.")
+        return value
