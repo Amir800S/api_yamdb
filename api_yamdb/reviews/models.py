@@ -1,14 +1,14 @@
-from api.validators import validate_regex_username
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
-
+from django.db import models
 
 from .validators import valid_year
+from api.validators import validate_regex_username
 
 
 class Category(models.Model):
+    """Модель категории."""
     name = models.CharField(
         blank=False,
         max_length=256,
@@ -32,6 +32,7 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Модель Жанра."""
     name = models.CharField(
         blank=False,
         max_length=256,
@@ -54,6 +55,7 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Модель Тайтла."""
     name = models.CharField(
         blank=False,
         max_length=256,
@@ -66,11 +68,10 @@ class Title(models.Model):
         blank=True,
         null=True,
         verbose_name='Описание произведения',)
-    genre = models.ForeignKey(
+    genre = models.ManyToManyField(
         Genre,
         blank=False,
-        null=True,
-        on_delete=models.SET_NULL,
+        null=False,
         verbose_name='Жанр произведения',)
     category = models.ForeignKey(
         Category,
@@ -86,26 +87,6 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class TitleGenre(models.Model):
-    """Вспомогательная таблица многое-ко-многим - произведения и жанры."""
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        verbose_name='Произведение',)
-    genre = models.ForeignKey(
-        Genre,
-        on_delete=models.CASCADE,
-        verbose_name='Жанр'
-    )
-
-    class Meta:
-        verbose_name = 'Соответствие жанра и произведения'
-        ordering = ('id',)
-
-    def __str__(self):
-        return f'{self.title}-{self.genre}'
 
 
 class User(AbstractUser):
@@ -201,6 +182,7 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """Модель Комменты."""
     review = models.ForeignKey(
         Review,
         blank=False,

@@ -8,28 +8,22 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly
-)
-
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Genre, Title, User
 
-from reviews.models import User, Category, Comment, Genre, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title, User
 from .filters import TitleFilter
 from .mixins import ListCreateDeleteViewSet
-from .permissions import (
-    IsAdmin,
-    IsAdminOrReadOnly,
-    IsAuthorOrModeratorOrReadOnly
-)
-from .serializers import (AdminSerializer, CategorySerializer, GenreSerializer,
-                          RegistrationSerializer, TitleReadSerializer,
-                          TitleWriteSerializer, TokenConfirmationSerializer,
-                          UserSerializer, CommentSerializer, ReviewSerializer)
+from .permissions import (IsAdmin, IsAdminOrReadOnly,
+                          IsAuthorOrModeratorOrReadOnly)
+from .serializers import (AdminSerializer, CategorySerializer,
+                          CommentSerializer, GenreSerializer,
+                          RegistrationSerializer, ReviewSerializer,
+                          TitleReadSerializer, TitleWriteSerializer,
+                          TokenConfirmationSerializer, UserSerializer)
 
 
 class UserCreation(APIView):
@@ -115,6 +109,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(ListCreateDeleteViewSet):
+    """Вьюсет для категории."""
     queryset = Category.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
     serializer_class = CategorySerializer
@@ -133,7 +128,9 @@ class CategoryViewSet(ListCreateDeleteViewSet):
         category.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class GenreViewSet(ListCreateDeleteViewSet):
+    """Вьюсет для жанра."""
     queryset = Genre.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
     serializer_class = GenreSerializer
@@ -149,6 +146,7 @@ class GenreViewSet(ListCreateDeleteViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    """Вьюсет для произведения."""
     queryset = Title.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
@@ -162,6 +160,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """Вьюсет для отзыва."""
     serializer_class = ReviewSerializer
     permission_classes = [
         IsAuthenticatedOrReadOnly,
@@ -181,6 +180,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """Вьюсет для комментариев."""
     serializer_class = CommentSerializer
     permission_classes = [
         IsAuthenticatedOrReadOnly,

@@ -2,15 +2,16 @@ import csv
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError
-from reviews.models import Category, Genre, Title, TitleGenre, User
 
+from reviews.models import Category, Comment, Genre, Review, Title, User
 from api_yamdb.settings import BASE_DIR
 
 CSV_FILES = {Category: 'category.csv',
              Genre: 'genre.csv',
              Title: 'titles.csv',
-             TitleGenre: 'genre_title.csv',
              User: 'users.csv',
+             Comment: 'comments.csv',
+             Review: 'review.csv'
              }
 
 

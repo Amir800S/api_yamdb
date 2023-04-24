@@ -1,16 +1,15 @@
 from statistics import mean
 
-from rest_framework import serializers
-from reviews.models import Category, Comment, Genre, Review, Title, User
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
-
-from .validators import validate_regex_username, validate_username
+from rest_framework import serializers
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 from .validators import validate_regex_username, validate_username
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериалайзер для категории."""
 
     class Meta:
         exclude = ('id', )
@@ -19,6 +18,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериалайзер для жанров."""
 
     class Meta:
         exclude = ('id', )
@@ -54,20 +54,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
         if len(scores) > 0:
             return mean(scores)
         else:
-            return 0
-
-
-
-class TitleWriteSerializer(TitleReadSerializer):
-    """Сериализатор объектов класса Title при небезопасных запросах."""
-
-    genre = serializers.SlugRelatedField(queryset=Genre.objects.all(),
-                                         slug_field='slug',
-                                         many=True)
-    category = serializers.SlugRelatedField(queryset=Category.objects.all(),
-                                            slug_field='slug',
-                                            )
-
+            return None
 
 
 class TitleWriteSerializer(TitleReadSerializer):
@@ -153,6 +140,7 @@ class RegistrationSerializer(serializers.Serializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Сериалайзер для комментов."""
     author = serializers.SlugRelatedField(
         slug_field='username',
         queryset=User.objects.all(),
@@ -166,6 +154,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    """Сериалайзер для отзывов."""
     title = serializers.SlugRelatedField(
         slug_field='name',
         queryset=Title.objects.all(),

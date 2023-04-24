@@ -1,9 +1,10 @@
 from django.contrib import admin
 
-from .models import User, Title, Genre, Category, Comment, Review
+from .models import Category, Comment, Genre, Review, Title, User
 
 
 class UserAdmin(admin.ModelAdmin):
+    """Админка юзера."""
     list_display = (
         'username',
         'email',
@@ -18,6 +19,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 class CommentAdmin(admin.ModelAdmin):
+    """Админка коммента."""
     list_display = (
         'review',
         'author',
@@ -30,6 +32,7 @@ class CommentAdmin(admin.ModelAdmin):
 
 
 class ReviewAdmin(admin.ModelAdmin):
+    """Админка для ревью."""
     list_display = (
         'title',
         'author',
@@ -42,6 +45,7 @@ class ReviewAdmin(admin.ModelAdmin):
 
 
 class CategoryAdmin(admin.ModelAdmin):
+    """Админка для категории."""
     list_display = ('pk',
                     'name',
                     'slug')
@@ -51,6 +55,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 class GenreAdmin(admin.ModelAdmin):
+    """Админка для жанра."""
     list_display = ('pk',
                     'name',
                     'slug')
@@ -60,6 +65,7 @@ class GenreAdmin(admin.ModelAdmin):
 
 
 class TitleAdmin(admin.ModelAdmin):
+    """Админка для произведения."""
     list_display = ('pk',
                     'name',
                     'year',

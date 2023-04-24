@@ -1,14 +1,9 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from api.views import (UserCreation,
-                       JWTTokenConfirmation,
-                       UserViewSet,
-                       CategoryViewSet,
-                       CommentViewSet,
-                       GenreViewSet,
-                       ReviewViewSet,
-                       TitleViewSet)
+from api.views import (CategoryViewSet, CommentViewSet, GenreViewSet,
+                       JWTTokenConfirmation, ReviewViewSet, TitleViewSet,
+                       UserCreation, UserViewSet)
 
 router_v1 = DefaultRouter()
 
@@ -34,4 +29,3 @@ urlpatterns = [
     path('v1/auth/token/', JWTTokenConfirmation.as_view(),
          name='token'),
 ]
-
