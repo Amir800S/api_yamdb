@@ -1,6 +1,6 @@
 import os
-
 from datetime import timedelta
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -84,7 +84,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 LANGUAGE_CODE = 'ru-RU'
 
