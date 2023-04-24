@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404
 
 from .validators import validate_regex_username, validate_username
 
+from .validators import validate_regex_username, validate_username
+
 
 class CategorySerializer(serializers.ModelSerializer):
 
@@ -53,6 +55,18 @@ class TitleReadSerializer(serializers.ModelSerializer):
             return mean(scores)
         else:
             return 0
+
+
+
+class TitleWriteSerializer(TitleReadSerializer):
+    """Сериализатор объектов класса Title при небезопасных запросах."""
+
+    genre = serializers.SlugRelatedField(queryset=Genre.objects.all(),
+                                         slug_field='slug',
+                                         many=True)
+    category = serializers.SlugRelatedField(queryset=Category.objects.all(),
+                                            slug_field='slug',
+                                            )
 
 
 

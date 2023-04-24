@@ -12,9 +12,11 @@ from rest_framework.permissions import (
     IsAuthenticated,
     IsAuthenticatedOrReadOnly
 )
+
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from reviews.models import Category, Genre, Title, User
 
 from reviews.models import User, Category, Comment, Genre, Review, Title
 from .filters import TitleFilter
@@ -28,7 +30,6 @@ from .serializers import (AdminSerializer, CategorySerializer, GenreSerializer,
                           RegistrationSerializer, TitleReadSerializer,
                           TitleWriteSerializer, TokenConfirmationSerializer,
                           UserSerializer, CommentSerializer, ReviewSerializer)
-
 
 
 class UserCreation(APIView):
@@ -127,6 +128,10 @@ class CategoryViewSet(ListCreateDeleteViewSet):
         category.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    def delete(self, request, pk, format=None):
+        category = self.model.objects.get(category_id=pk, user=request.user)
+        category.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class GenreViewSet(ListCreateDeleteViewSet):
     queryset = Genre.objects.all()

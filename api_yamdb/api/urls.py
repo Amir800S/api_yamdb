@@ -34,3 +34,4 @@ urlpatterns = [
     path('v1/auth/token/', JWTTokenConfirmation.as_view(),
          name='token'),
 ]
+
