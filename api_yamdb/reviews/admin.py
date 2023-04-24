@@ -41,7 +41,7 @@ class TitleAdmin(admin.ModelAdmin):
                     'year',
                     'description')
     search_fields = ('name',)
-    list_filter = ('name')
+    list_filter = ('name', )
     empty_value_display = '-пусто-'
 
 
