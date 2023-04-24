@@ -17,9 +17,35 @@ class UserAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
+class CommentAdmin(admin.ModelAdmin):
+    list_display = (
+        'review',
+        'author',
+        'text',
+        'pub_date',
+    )
+    list_filter = ('review',)
+    search_fields = ('text',)
+    empty_value_display = '-пусто-'
+
+
+
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = (
+        'title',
+        'author',
+        'text',
+        'score',
+        'pub_date',
+    )
+    list_filter = ('title',)
+    search_fields = ('text',)
+    empty_value_display = '-пусто-'
+
+
 admin.site.register(User, UserAdmin)
 admin.site.register(Title)
 admin.site.register(Genre)
 admin.site.register(Category)
-admin.site.register(Comment)
-admin.site.register(Review)
+admin.site.register(Comment, CommentAdmin)
+admin.site.register(Review, ReviewAdmin)
