@@ -5,33 +5,30 @@ from reviews.models import Category, Comment, Genre, Review, Title, User
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 
+from .validators import validate_regex_username, validate_username
+
 
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        exclude = ('id', )
+        lookup_field = "slug"
         model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        exclude = ('id', )
+        lookup_field = "slug"
         model = Genre
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    category = serializers.SlugRelatedField(
-        slug_field='slug',
-        queryset=Category.objects.all(),
-        required=False
-    )
+class TitleReadSerializer(serializers.ModelSerializer):
+    """Сериализатор объектов класса Title при GET-запросе."""
 
-    genre = serializers.SlugRelatedField(
-        slug_field='slug',
-        queryset=Genre.objects.all(),
-        required=True
-    )
+    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
     rating = serializers.SerializerMethodField()
 
     class Meta:
@@ -58,6 +55,18 @@ class TitleSerializer(serializers.ModelSerializer):
             return 0
 
 
+
+class TitleWriteSerializer(TitleReadSerializer):
+    """Сериализатор объектов класса Title при небезопасных запросах."""
+
+    genre = serializers.SlugRelatedField(queryset=Genre.objects.all(),
+                                         slug_field='slug',
+                                         many=True)
+    category = serializers.SlugRelatedField(queryset=Category.objects.all(),
+                                            slug_field='slug',
+                                            )
+
+
 class AdminSerializer(serializers.ModelSerializer):
     """Сериалайзер для админа: Все поля редактируемы."""
     class Meta:
@@ -67,7 +76,6 @@ class AdminSerializer(serializers.ModelSerializer):
             'email',
             'first_name',
             'last_name',
-            'confirmation_code',
             'bio',
             'role'
         )
@@ -75,6 +83,9 @@ class AdminSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериалайзер простого юзера: Невозможно поменять роль."""
+    username = serializers.CharField(required=True, max_length=150,
+                                     validators=(validate_regex_username, ))
+
     class Meta:
         model = User
         fields = (
@@ -82,7 +93,6 @@ class UserSerializer(serializers.ModelSerializer):
             'email',
             'last_name',
             'first_name',
-            'confirmation_code',
             'role',
             'bio',
         )
@@ -102,13 +112,29 @@ class TokenConfirmationSerializer(serializers.ModelSerializer):
         )
 
 
-class RegistrationSerializer(serializers.ModelSerializer):
+class RegistrationSerializer(serializers.Serializer):
     """Сериалайзер для регистрации пользователя."""
+    email = serializers.EmailField(required=True, max_length=254,)
+    username = serializers.CharField(required=True, max_length=150,
+                                     validators=(
+                                         validate_username,
+                                         validate_regex_username))
+
+    def validate(self, data):
+        """Валидация целиком и отдельно по полям."""
+        if not User.objects.filter(
+            username=data['username'], email=data['email']
+        ):
+            if User.objects.filter(username=data['username']):
+                raise serializers.ValidationError('Никнейм уже существует!')
+            if User.objects.filter(email=data['email']):
+                raise serializers.ValidationError('Email уже существует!')
+        return data
+
     class Meta:
-        model = User
         fields = (
             'username',
-            'email'
+            'email',
         )
 
 

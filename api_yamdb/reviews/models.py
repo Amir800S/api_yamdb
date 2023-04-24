@@ -1,10 +1,10 @@
+from api.validators import validate_regex_username
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 from .validators import valid_year
-from api.validators import validate_username, validate_regex_username
 
 
 class Category(models.Model):
@@ -21,8 +21,13 @@ class Category(models.Model):
         verbose_name='Slug категории',
     )
 
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+        ordering = ('name',)
+
     def __str__(self):
-        return self.name
+        return self.slug
 
 
 class Genre(models.Model):
@@ -39,8 +44,12 @@ class Genre(models.Model):
         verbose_name='Slug жанра',
     )
 
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+
     def __str__(self):
-        return self.name
+        return self.slug
 
 
 class Title(models.Model):
@@ -70,6 +79,33 @@ class Title(models.Model):
         related_name='titles',
         verbose_name='Категория произведения',)
 
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+
+    def __str__(self):
+        return self.name
+
+
+class TitleGenre(models.Model):
+    """Вспомогательная таблица многое-ко-многим - произведения и жанры."""
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name='Произведение',)
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE,
+        verbose_name='Жанр'
+    )
+
+    class Meta:
+        verbose_name = 'Соответствие жанра и произведения'
+        ordering = ('id',)
+
+    def __str__(self):
+        return f'{self.title}-{self.genre}'
+
 
 class User(AbstractUser):
     """Модель пользователя."""
@@ -79,9 +115,7 @@ class User(AbstractUser):
         null=False,
         blank=False,
         unique=True,
-        validators=(
-            validate_username,
-            validate_regex_username),
+        validators=(validate_regex_username, )
     )
     email = models.EmailField(
         'Email',
@@ -89,6 +123,12 @@ class User(AbstractUser):
         null=False,
         unique=True,
         blank=False,
+    )
+    role = models.CharField(
+        'Статус пользователя',
+        max_length=15,
+        choices=settings.USER_ROLE_CHOICES,
+        default=settings.USER,
     )
     first_name = models.CharField(
         max_length=150,
@@ -103,21 +143,17 @@ class User(AbstractUser):
         max_length=200,
         blank=True
     )
-    role = models.CharField(
-        'Статус пользователя',
-        max_length=15,
-        choices=settings.USER_ROLE_CHOICES,
-        default=settings.USER,
-    )
     confirmation_code = models.CharField(
         max_length=255,
-        default='not defined yet'
+        default='not defined yet',
+        blank=True
     )
 
     def __str__(self):
         return 'Пользователь - {}'.format(self.username)
 
     class Meta:
+        ordering = ('username', )
         verbose_name_plural = 'Пользователи'
 
 

@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from api.views import (UserCreation,
@@ -32,5 +32,5 @@ urlpatterns = [
     path('v1/auth/signup/', UserCreation.as_view(),
          name='signup'),
     path('v1/auth/token/', JWTTokenConfirmation.as_view(),
-         name='get_token'),
+         name='token'),
 ]
