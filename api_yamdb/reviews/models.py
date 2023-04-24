@@ -114,4 +114,5 @@ class User(AbstractUser):
         return 'Пользователь - {}'.format(self.username)
 
     class Meta:
+        ordering = ('username', )
         verbose_name_plural = 'Пользователи'
