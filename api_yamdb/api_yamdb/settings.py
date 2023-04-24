@@ -1,6 +1,6 @@
 import os
-
 from datetime import timedelta
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,10 +21,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_filters',
+    'drf_spectacular',
     'rest_framework',
+    'djoser',
     'api',
     'reviews',
-    'djoser',
 ]
 
 MIDDLEWARE = [
@@ -83,7 +84,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
@@ -99,18 +99,38 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-    ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,  # Пагинация по умолчанию
 }
 
-SIMPLE_JWT = {'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+SIMPLE_JWT = {'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
               'AUTH_HEADER_TYPES': ('Bearer',), }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'reviews.User'
+
+# Роли пользователей
+MODERATOR = 'moderator'
+USER = 'user'
+ADMIN = 'admin'
+
+USER_ROLE_CHOICES = (
+    (MODERATOR, 'moderator'),
+    (USER, 'user'),
+    (ADMIN, 'admin'),
+)
+
+# Отправка email
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = 587
