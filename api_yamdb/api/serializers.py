@@ -1,10 +1,13 @@
 from statistics import mean
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.db.models import UniqueConstraint
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from rest_framework.validators import UniqueValidator
 
+from reviews.models import Category, Comment, Genre, Review, Title, User
 from .validators import validate_regex_username, validate_username
 
 
@@ -70,6 +73,18 @@ class TitleWriteSerializer(TitleReadSerializer):
 
 class AdminSerializer(serializers.ModelSerializer):
     """Сериалайзер для админа: Все поля редактируемы."""
+    username = serializers.CharField(
+        max_length=settings.USERNAME_MAX_LENGHT,
+        required=True,
+        validators=[
+            validate_regex_username,
+            validate_username,
+            UniqueValidator(queryset=User.objects.all())
+        ])
+    email = serializers.EmailField(
+        required=True,
+        max_length=settings.EMAIL_MAX_LENGHT),
+
     class Meta:
         model = User
         fields = (
@@ -80,32 +95,27 @@ class AdminSerializer(serializers.ModelSerializer):
             'bio',
             'role'
         )
+        constraints = [
+            UniqueConstraint(fields=[
+                'username',
+                'email',
+            ],
+                name='Проверка уникальности email и username')
+        ]
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(AdminSerializer):
     """Сериалайзер простого юзера: Невозможно поменять роль."""
-    username = serializers.CharField(required=True, max_length=150,
-                                     validators=(validate_regex_username, ))
 
-    class Meta:
-        model = User
-        fields = (
-            'username',
-            'email',
-            'last_name',
-            'first_name',
-            'role',
-            'bio',
-        )
+    class Meta(AdminSerializer.Meta):
         read_only_fields = ('role',)
 
 
-class TokenConfirmationSerializer(serializers.ModelSerializer):
+class TokenConfirmationSerializer(AdminSerializer):
     """Сериалайзер токена."""
-    username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
-    class Meta:
+    class Meta(AdminSerializer.Meta):
         model = User
         fields = (
             'username',
@@ -113,26 +123,17 @@ class TokenConfirmationSerializer(serializers.ModelSerializer):
         )
 
 
-class RegistrationSerializer(serializers.Serializer):
+class RegistrationSerializer(AdminSerializer):
     """Сериалайзер для регистрации пользователя."""
-    email = serializers.EmailField(required=True, max_length=254,)
-    username = serializers.CharField(required=True, max_length=150,
+    email = serializers.EmailField(required=True,
+                                   max_length=settings.EMAIL_MAX_LENGHT,)
+    username = serializers.CharField(required=True,
+                                     max_length=settings.USERNAME_MAX_LENGHT,
                                      validators=(
                                          validate_username,
                                          validate_regex_username))
 
-    def validate(self, data):
-        """Валидация целиком и отдельно по полям."""
-        if not User.objects.filter(
-            username=data['username'], email=data['email']
-        ):
-            if User.objects.filter(username=data['username']):
-                raise serializers.ValidationError('Никнейм уже существует!')
-            if User.objects.filter(email=data['email']):
-                raise serializers.ValidationError('Email уже существует!')
-        return data
-
-    class Meta:
+    class Meta(AdminSerializer.Meta):
         fields = (
             'username',
             'email',

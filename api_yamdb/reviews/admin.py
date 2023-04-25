@@ -1,9 +1,10 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .models import Category, Comment, Genre, Review, Title, User
 
 
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(BaseUserAdmin):
     """Админка юзера."""
     list_display = (
         'username',
@@ -13,8 +14,13 @@ class UserAdmin(admin.ModelAdmin):
         'role',
         'bio',
     )
-    list_filter = ('username',)
-    search_fields = ('username',)
+    list_display_links = (
+        'username',
+        'email',
+    )
+    list_editable = ('role', )
+    list_filter = ('username', )
+    search_fields = ('username', )
     empty_value_display = '-пусто-'
 
 

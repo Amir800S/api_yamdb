@@ -22,10 +22,12 @@ router_v1.register(
     basename='comment'
 )
 
+auth_urls = [
+    path('token/', JWTTokenConfirmation.as_view(), name='get_token'),
+    path('signup/', UserCreation.as_view(), name='signup'),
+]
+
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
-    path('v1/auth/signup/', UserCreation.as_view(),
-         name='signup'),
-    path('v1/auth/token/', JWTTokenConfirmation.as_view(),
-         name='token'),
+    path('v1/auth/', include(auth_urls)),
 ]

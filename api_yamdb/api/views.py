@@ -2,10 +2,10 @@ from http import HTTPStatus
 
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import EmailMessage
+from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, status, viewsets
+from rest_framework import filters, status, viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (IsAuthenticated,
@@ -31,13 +31,12 @@ class UserCreation(APIView):
 
     @staticmethod
     def send_participation_code(user_data):
-        message = EmailMessage(
-            subject=user_data['subject'],
-            body=user_data['message'],
-            from_email=settings.EMAIL_HOST_USER,
-            to=[user_data['to_email']],
+        return send_mail(
+            user_data['subject'],
+            user_data['message'],
+            settings.EMAIL_HOST_USER,
+            [user_data['to_email']],
         )
-        message.send()
 
     @staticmethod
     def token_generator(signed_user):
@@ -47,16 +46,32 @@ class UserCreation(APIView):
         serializer = RegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        signed_user, created = User.objects.get_or_create(
-            username=data.get('username'),
-            email=data.get('email')
-        )
+        if not User.objects.filter(
+            username=data['username'], email=data['email']
+        ):
+            if User.objects.filter(username=data['username']):
+                raise serializers.ValidationError('Никнейм уже существует!')
+            if User.objects.filter(email=data['email']):
+                raise serializers.ValidationError('Email уже существует!')
+        try:
+            signed_user, created = User.objects.get_or_create(
+                username=data.get('username'),
+                email=data.get('email')
+            )
+        except User.DoesNotExist:
+            return Response(
+                settings.EMAIL_EXISTS_MESSAGE if
+                User.objects.filter(email='email').exists()
+                else settings.USERNAME_EXISTS_MESSAGE,
+                status=HTTPStatus.BAD_REQUEST
+            )
         signed_user.confirmation_code = self.token_generator(signed_user)
         user_data = {
             'subject': f'Код подтверждения для {signed_user.username}',
             'message': signed_user.confirmation_code,
             'to_email': signed_user.email
         }
+
         self.send_participation_code(user_data)
         return Response(serializer.data, status=HTTPStatus.OK)
 
@@ -71,7 +86,9 @@ class JWTTokenConfirmation(APIView):
         current_user = get_object_or_404(
             User, username=user_data.get('username'),
         )
-        if user_data['confirmation_code'] == current_user.confirmation_code:
+        confirmation_code = serializer.validated_data['confirmation_code']
+        if default_token_generator.check_token(current_user,
+                                               confirmation_code):
             refreshed_token = RefreshToken.for_user(current_user)
             return Response({
                 'JWT-Код': str(refreshed_token.access_token),
@@ -90,22 +107,21 @@ class UserViewSet(viewsets.ModelViewSet):
     search_fields = ('username',)
     lookup_field = 'username'
     http_method_names = ('patch', 'post', 'get', 'delete',)
-    permission_classes = (IsAuthenticated, IsAdmin)
+    permission_classes = (IsAdmin, )
     pagination_class = LimitOffsetPagination
 
     @action(detail=False, url_path='me', methods=['GET', 'PATCH'],
             permission_classes=(IsAuthenticated,))
     def get_or_patch_self_profile(self, request):
         """Пользователь может изменить и получить данные о себе."""
-        user = get_object_or_404(User, id=request.user.id)
+        user = request.user
         if request.method == 'GET':
             serializer = UserSerializer(user, many=False)
             return Response(serializer.data)
         serializer = UserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=HTTPStatus.OK)
-        return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=HTTPStatus.OK)
 
 
 class CategoryViewSet(ListCreateDeleteViewSet):
