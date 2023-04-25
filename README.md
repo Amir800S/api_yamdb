@@ -89,4 +89,3 @@ http://127.0.0.1:8000/api/v1/auth/token/
 ### ⫸ [*Амир Сосламбеков*](https://github.com/Amir800S) 
 ### ⫸ [*Нурбек Орозалиев*](https://github.com/Nurbek878) 
 ### ⫸ [*Михаил Ашин* ](https://github.com/MichaelAshin)
-### ⫸ [*Михаил Ашин* ](https://github.com/MichaelAshin)
