@@ -4,7 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from .validators import valid_year
-from api.validators import validate_regex_username
+from api.validators import validate_regex_username, validate_username
 
 
 class Category(models.Model):
@@ -97,7 +97,8 @@ class User(AbstractUser):
         null=False,
         blank=False,
         unique=True,
-        validators=(validate_regex_username, )
+        validators=(validate_regex_username,
+                    validate_username),
     )
     email = models.EmailField(
         'Email',
@@ -108,7 +109,8 @@ class User(AbstractUser):
     )
     role = models.CharField(
         'Статус пользователя',
-        max_length=15,
+        max_length=max(
+            len(role) for role, translated in settings.USER_ROLE_CHOICES),
         choices=settings.USER_ROLE_CHOICES,
         default=settings.USER,
     )
@@ -120,9 +122,8 @@ class User(AbstractUser):
         max_length=150,
         blank=True,
     )
-    bio = models.CharField(
+    bio = models.TextField(
         'Биография',
-        max_length=200,
         blank=True
     )
     confirmation_code = models.CharField(
@@ -131,12 +132,21 @@ class User(AbstractUser):
         blank=True
     )
 
-    def __str__(self):
-        return 'Пользователь - {}'.format(self.username)
-
     class Meta:
         ordering = ('username', )
         verbose_name_plural = 'Пользователи'
+
+    @property
+    def is_admin(self):
+        return (self.role == settings.ADMIN
+                or self.is_superuser or self.is_staff)
+
+    @property
+    def is_moderator(self):
+        return self.role == settings.MODERATOR
+
+    def __str__(self):
+        return 'Пользователь - {}'.format(self.username)
 
 
 class Review(models.Model):
