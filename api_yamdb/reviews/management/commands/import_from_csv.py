@@ -2,7 +2,7 @@ import csv
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError
-from reviews.models import Category, Genre, Title, User
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 import api_yamdb.settings
 
@@ -10,8 +10,8 @@ CSV_FILES = {Category: 'category.csv',
              Genre: 'genre.csv',
              Title: 'titles.csv',
              User: 'users.csv',
-             #  Review: 'review.csv'
-             #  Comment: 'comments.csv',
+             Review: 'review.csv',
+             Comment: 'comments.csv',
              }
 
 
