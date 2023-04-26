@@ -111,8 +111,9 @@ class UserSerializer(AdminSerializer):
         read_only_fields = ('role',)
 
 
-class TokenConfirmationSerializer(AdminSerializer):
+class TokenConfirmationSerializer(serializers.Serializer):
     """Сериалайзер токена."""
+    username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
     class Meta(AdminSerializer.Meta):
@@ -123,7 +124,7 @@ class TokenConfirmationSerializer(AdminSerializer):
         )
 
 
-class RegistrationSerializer(AdminSerializer):
+class RegistrationSerializer(serializers.Serializer):
     """Сериалайзер для регистрации пользователя."""
     email = serializers.EmailField(required=True,
                                    max_length=settings.EMAIL_MAX_LENGHT,)
