@@ -2,11 +2,10 @@ from rest_framework import permissions
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
-    """Проверка на права доступа для Админа или только для чтения."""
+    """Проверка на права доступа для Админа или только чтение."""
     def has_permission(self, request, view):
-        return (request.method in permissions.SAFE_METHODS
-                or (request.user.is_authenticated
-                    and request.user.role == 'admin'))
+        return (request.user.is_authenticated and request.user.is_admin
+                or request.method in permissions.SAFE_METHODS)
 
 
 class IsAdmin(permissions.BasePermission):
