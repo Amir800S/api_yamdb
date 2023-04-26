@@ -104,7 +104,7 @@ class AdminSerializer(serializers.ModelSerializer):
         ]
 
 
-class UserSerializer(AdminSerializer):
+class UserSerializer(serializers.Serializer):
     """Сериалайзер простого юзера: Невозможно поменять роль."""
 
     class Meta(AdminSerializer.Meta):
@@ -113,6 +113,7 @@ class UserSerializer(AdminSerializer):
 
 class TokenConfirmationSerializer(AdminSerializer):
     """Сериалайзер токена."""
+    username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
     class Meta(AdminSerializer.Meta):
@@ -123,7 +124,7 @@ class TokenConfirmationSerializer(AdminSerializer):
         )
 
 
-class RegistrationSerializer(AdminSerializer):
+class RegistrationSerializer(serializers.Serializer):
     """Сериалайзер для регистрации пользователя."""
     email = serializers.EmailField(required=True,
                                    max_length=settings.EMAIL_MAX_LENGHT,)
