@@ -104,14 +104,14 @@ class AdminSerializer(serializers.ModelSerializer):
         ]
 
 
-class UserSerializer(serializers.Serializer):
+class UserSerializer(AdminSerializer):
     """Сериалайзер простого юзера: Невозможно поменять роль."""
 
     class Meta(AdminSerializer.Meta):
         read_only_fields = ('role',)
 
 
-class TokenConfirmationSerializer(AdminSerializer):
+class TokenConfirmationSerializer(serializers.Serializer):
     """Сериалайзер токена."""
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
