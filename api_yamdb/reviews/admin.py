@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import Category, Comment, Genre, Review, Title, User
+from .models import Category, Comment, Review, Title, User
 
 
 class UserAdmin(BaseUserAdmin):
@@ -60,14 +60,9 @@ class CategoryAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-class GenreAdmin(admin.ModelAdmin):
+class GenreInline(admin.TabularInline):
     """Админка для жанра."""
-    list_display = ('pk',
-                    'name',
-                    'slug')
-    list_filter = ('name',)
-    search_fields = ('name',)
-    empty_value_display = '-пусто-'
+    model = Title.genre.through
 
 
 class TitleAdmin(admin.ModelAdmin):
@@ -75,15 +70,22 @@ class TitleAdmin(admin.ModelAdmin):
     list_display = ('pk',
                     'name',
                     'year',
-                    'description')
+                    'description',
+                    'category')
     search_fields = ('name',)
     list_filter = ('name', )
     empty_value_display = '-пусто-'
+    list_editable = ('category',)
+    inlines = [
+        GenreInline
+    ]
+
+    def output_of_genres(self, obj):
+        return ', '.join([str(genre) for genre in obj.genre.all()])
 
 
 admin.site.register(User, UserAdmin)
 admin.site.register(Comment, CommentAdmin)
 admin.site.register(Review, ReviewAdmin)
 admin.site.register(Category, CategoryAdmin)
-admin.site.register(Genre, GenreAdmin)
 admin.site.register(Title, TitleAdmin)

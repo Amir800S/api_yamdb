@@ -2,16 +2,16 @@ import csv
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError
-
 from reviews.models import Category, Comment, Genre, Review, Title, User
-from api_yamdb.settings import BASE_DIR
+
+import api_yamdb.settings
 
 CSV_FILES = {Category: 'category.csv',
              Genre: 'genre.csv',
              Title: 'titles.csv',
              User: 'users.csv',
+             Review: 'review.csv',
              Comment: 'comments.csv',
-             Review: 'review.csv'
              }
 
 
@@ -20,7 +20,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         for model, csv_file in CSV_FILES.items():
-            with open(f'{BASE_DIR}/static/data/{csv_file}',
+            with open(f'{api_yamdb.settings.BASE_DIR}/static/data/{csv_file}',
                       'r', encoding='utf8') as file:
                 for row in csv.DictReader(file, delimiter=','):
                     shallow_copy = row.copy()
