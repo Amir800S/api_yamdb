@@ -61,8 +61,7 @@ class Title(models.Model):
         verbose_name='Описание произведения',)
     genre = models.ManyToManyField(
         Genre,
-        blank=False,
-        null=False,
+        through='GenreTitle',
         verbose_name='Жанр произведения',)
     category = models.ForeignKey(
         Category,
@@ -78,6 +77,21 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class GenreTitle(models.Model):
+    """Класс для объединения жанров и произведений."""
+    genre_id = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE,
+        verbose_name='ID жанра'
+    )
+
+    title_id = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name='ID произведения'
+    )
 
 
 class User(AbstractUser):
