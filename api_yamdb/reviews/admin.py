@@ -35,6 +35,10 @@ class GenreAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
+class GenreInline(admin.TabularInline):
+    model = Genre
+
+
 class TitleAdmin(admin.ModelAdmin):
     list_display = ('pk',
                     'name',
@@ -42,7 +46,15 @@ class TitleAdmin(admin.ModelAdmin):
                     'description')
     search_fields = ('name',)
     list_filter = ('name')
+    list_editable = ('name', 'year',)
     empty_value_display = '-пусто-'
+    list_editable = ('category',)
+    inlines = [
+        GenreInline
+    ]
+
+    def output_of_genres(self, obj):
+        return ', '.join([str(genre) for genre in obj.genre.all()])
 
 
 admin.site.register(User, UserAdmin)

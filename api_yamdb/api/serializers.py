@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from reviews.models import Category, Genre, Title, User
 
+from reviews.models import Category, Genre, Title, User
 from .validators import validate_regex_username, validate_username
 
 
@@ -8,7 +8,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         exclude = ('id', )
-        lookup_field = "slug"
+        lookup_field = 'slug'
         model = Category
 
 
@@ -16,7 +16,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         exclude = ('id', )
-        lookup_field = "slug"
+        lookup_field = 'slug'
         model = Genre
 
 
