@@ -3,9 +3,10 @@ from http import HTTPStatus
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, status, viewsets, serializers
+from rest_framework import filters, viewsets, serializers
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (IsAuthenticated,
@@ -127,47 +128,24 @@ class UserViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(ListCreateDeleteViewSet):
     """Вьюсет для категории."""
     queryset = Category.objects.all()
-    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = CategorySerializer
-    pagination_class = LimitOffsetPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
-
-    def delete(self, request, pk, format=None):
-        category = self.model.objects.get(category_id=pk, user=request.user)
-        category.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def delete(self, request, pk, format=None):
-        category = self.model.objects.get(category_id=pk, user=request.user)
-        category.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class GenreViewSet(ListCreateDeleteViewSet):
     """Вьюсет для жанра."""
     queryset = Genre.objects.all()
-    permission_classes = (IsAdminOrReadOnly,)
     serializer_class = GenreSerializer
-    pagination_class = LimitOffsetPagination
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    lookup_field = 'slug'
-
-    def delete(self, request, pk, format=None):
-        genre = self.model.objects.get(genre_id=pk, user=request.user)
-        genre.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для произведения."""
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(
+        Avg('reviews__score')).order_by('name')
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
-    filter_backends = (DjangoFilterBackend,)
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
     filterset_class = TitleFilter
+    ordering_fields = ['name', 'year']
 
     def get_serializer_class(self):
         if self.request.method in ['POST', 'PATCH']:

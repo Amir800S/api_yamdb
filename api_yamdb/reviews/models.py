@@ -7,51 +7,41 @@ from .validators import valid_year
 from api.validators import validate_regex_username, validate_username
 
 
-class Category(models.Model):
-    """Модель категории."""
-    name = models.CharField(
-        blank=False,
-        max_length=256,
-        unique=True,
-        verbose_name='Название категории',
-    )
-    slug = models.SlugField(
-        blank=False,
-        max_length=50,
-        unique=True,
-        verbose_name='Slug категории',
-    )
+class BaseModel(models.Model):
+    """Абстрактный родительский класс для моделей категория и жанр."""
+    name = models.CharField(max_length=settings.TEXT_LENGTH,
+                            unique=True,
+                            blank=False,
+                            verbose_name='имя')
+    slug = models.SlugField(max_length=settings.SLUG_LENGTH,
+                            unique=True,
+                            blank=False,
+                            verbose_name='slug')
 
     class Meta:
+        abstract = True
+        ordering = ('name',)
+        verbose_name = 'Базовая модель'
+        verbose_name_plural = 'Базовые модели'
+
+    def __str__(self):
+        return self.name
+
+
+class Category(BaseModel):
+    """Модель категория."""
+
+    class Meta(BaseModel.Meta):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.slug
 
 
-class Genre(models.Model):
-    """Модель Жанра."""
-    name = models.CharField(
-        blank=False,
-        max_length=256,
-        unique=True,
-        verbose_name='Название жанра',
-    )
-    slug = models.SlugField(
-        blank=False,
-        max_length=50,
-        unique=True,
-        verbose_name='Slug жанра',
-    )
+class Genre(BaseModel):
+    """Модель жанр."""
 
-    class Meta:
+    class Meta(BaseModel.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
-
-    def __str__(self):
-        return self.slug
 
 
 class Title(models.Model):
@@ -60,9 +50,10 @@ class Title(models.Model):
         blank=False,
         max_length=256,
         verbose_name='Название произведения',)
-    year = models.IntegerField(
+    year = models.PositiveSmallIntegerField(
         blank=False,
         verbose_name='Год произведения',
+        db_index=True,
         validators=(valid_year,))
     description = models.TextField(
         blank=True,
@@ -70,8 +61,7 @@ class Title(models.Model):
         verbose_name='Описание произведения',)
     genre = models.ManyToManyField(
         Genre,
-        blank=False,
-        null=False,
+        through='GenreTitle',
         verbose_name='Жанр произведения',)
     category = models.ForeignKey(
         Category,
@@ -87,6 +77,21 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class GenreTitle(models.Model):
+    """Класс для объединения жанров и произведений."""
+    genre_id = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE,
+        verbose_name='ID жанра'
+    )
+
+    title_id = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name='ID произведения'
+    )
 
 
 class User(AbstractUser):
