@@ -123,14 +123,20 @@ USER = 'user'
 ADMIN = 'admin'
 
 USER_ROLE_CHOICES = (
-    (MODERATOR, 'moderator'),
-    (USER, 'user'),
-    (ADMIN, 'admin'),
+    (MODERATOR, 'модератор'),
+    (USER, 'пользователь'),
+    (ADMIN, 'админ'),
 )
 
 # Отправка email
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-EMAIL_PORT = 587
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+EMAIL_MAX_LENGHT = 254
+USERNAME_MAX_LENGHT = 150
+EMAIL_EXISTS_MESSAGE = 'Электронная почта уже занята!'
+USERNAME_EXISTS_MESSAGE = 'Никнейм уже занят!'
+
+TEXT_LENGTH = 256
+SLUG_LENGTH = 50
