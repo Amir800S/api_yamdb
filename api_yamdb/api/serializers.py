@@ -116,7 +116,7 @@ class TokenConfirmationSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
-    class Meta(AdminSerializer.Meta):
+    class Meta:
         model = User
         fields = (
             'username',
@@ -134,7 +134,7 @@ class RegistrationSerializer(serializers.Serializer):
                                          validate_username,
                                          validate_regex_username))
 
-    class Meta(AdminSerializer.Meta):
+    class Meta:
         fields = (
             'username',
             'email',
