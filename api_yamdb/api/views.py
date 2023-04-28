@@ -159,12 +159,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_title(self):
         return get_object_or_404(
             Title,
-            id=int(self.kwargs.get('title_id'))
+            id=self.kwargs.get('title_id')
         )
 
     def get_queryset(self):
-        queryset = self.get_title().reviews.all()
-        return queryset
+        return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
         serializer.save(
@@ -185,7 +184,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_review(self):
         return get_object_or_404(
             Review,
-            id=int(self.kwargs.get('review_id'))
+            id=self.kwargs.get('review_id')
         )
 
     def get_queryset(self):
