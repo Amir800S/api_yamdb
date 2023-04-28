@@ -98,7 +98,7 @@ class User(AbstractUser):
     """Модель пользователя."""
     username = models.CharField(
         'Никнейм',
-        max_length=150,
+        max_length=settings.USERNAME_MAX_LENGHT,
         null=False,
         blank=False,
         unique=True,
@@ -107,7 +107,7 @@ class User(AbstractUser):
     )
     email = models.EmailField(
         'Email',
-        max_length=254,
+        max_length=settings.EMAIL_MAX_LENGHT,
         null=False,
         unique=True,
         blank=False,
@@ -120,11 +120,11 @@ class User(AbstractUser):
         default=settings.USER,
     )
     first_name = models.CharField(
-        max_length=150,
+        max_length=settings.FIRST_USERNAME_MAX_LENGHT,
         blank=True,
     )
     last_name = models.CharField(
-        max_length=150,
+        max_length=settings.LAST_USERNAME_MAX_LENGHT,
         blank=True,
     )
     bio = models.TextField(
@@ -132,7 +132,7 @@ class User(AbstractUser):
         blank=True
     )
     confirmation_code = models.CharField(
-        max_length=255,
+        max_length=settings.CONFIRMATION_CODE_MAX_LENGHT,
         default='not defined yet',
         blank=True
     )
@@ -151,7 +151,7 @@ class User(AbstractUser):
         return self.role == settings.MODERATOR
 
     def __str__(self):
-        return 'Пользователь - {}'.format(self.username)
+        return f'Пользователь - {self.username}'
 
 
 class Review(models.Model):
