@@ -3,8 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from .validators import valid_year
 from api.validators import validate_regex_username, validate_username
+from .validators import valid_year
 
 
 class BaseModel(models.Model):
