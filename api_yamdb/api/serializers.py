@@ -46,7 +46,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
             'category'
         )
         model = Title
-        read_only_fields = ('rating',)
+        read_only_fields = ('__all__', )
 
 
 class TitleWriteSerializer(TitleReadSerializer):
@@ -56,8 +56,7 @@ class TitleWriteSerializer(TitleReadSerializer):
                                          slug_field='slug',
                                          many=True)
     category = serializers.SlugRelatedField(queryset=Category.objects.all(),
-                                            slug_field='slug',
-                                            )
+                                            slug_field='slug')
 
     def validate(self, data):
         if 'year' in data.keys():

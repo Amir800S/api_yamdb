@@ -9,7 +9,7 @@ from .validators import valid_year
 
 class NameSlug(models.Model):
     """Абстрактный родительский класс для моделей категория и жанр."""
-    name = models.CharField(max_length=settings.TEXT_LENGTH,
+    name = models.CharField(max_length=settings.NAME_TEXT_LENGTH,
                             unique=True,
                             blank=False,
                             verbose_name='имя')
@@ -48,7 +48,7 @@ class Title(models.Model):
     """Модель Тайтла."""
     name = models.CharField(
         blank=False,
-        max_length=256,
+        max_length=settings.NAME_TEXT_LENGTH,
         verbose_name='Название произведения',)
     year = models.PositiveSmallIntegerField(
         blank=False,
@@ -173,7 +173,7 @@ class PublicAuthor(models.Model):
         ordering = ('pub_date',)
 
     def __str__(self):
-        return self.text[:30]
+        return self.text[:settings.REVIEW_COMMENT_LENGHT]
 
 
 class Review(PublicAuthor):

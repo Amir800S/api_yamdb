@@ -13,14 +13,11 @@ CSV_FILES = {Category: 'category.csv',
              GenreTitle: 'genre_title.csv',
              User: 'users.csv',
              Review: 'review.csv',
-             Comment: 'comments.csv',
-             }
+             Comment: 'comments.csv'}
 
-REPLACE_FIELDS = {
-    Title: ['category', 'category_id'],
-    Review: ['author', 'author_id'],
-    Comment: ['author', 'author_id'],
-}
+REPLACE_FIELDS = {Title: ['category', 'category_id'],
+                  Review: ['author', 'author_id'],
+                  Comment: ['author', 'author_id']}
 
 
 def del_data():
@@ -30,7 +27,7 @@ def del_data():
 
 
 class Command(BaseCommand):
-    '''Команда очищает БД'''
+    """Команда очищает БД"""
     def add_arguments(self, parser):
         parser.add_argument(
             '-d',
