@@ -55,9 +55,9 @@ class UserCreation(APIView):
             )
         except IntegrityError:
             return Response(
-                settings.EMAIL_EXISTS_MESSAGE if
+                settings.USERNAME_EXISTS_MESSAGE if
                 User.objects.filter(username='username').exists()
-                else settings.USERNAME_EXISTS_MESSAGE,
+                else settings.EMAIL_EXISTS_MESSAGE,
                 status=HTTPStatus.BAD_REQUEST
             )
         signed_user.confirmation_code = self.token_generator(signed_user)
