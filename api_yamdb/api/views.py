@@ -25,7 +25,7 @@ from .serializers import (AdminSerializer, CategorySerializer,
                           RegistrationSerializer, ReviewSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
                           TokenConfirmationSerializer, UserSerializer)
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import Category, Genre, Review, Title, User
 
 
 class UserCreation(APIView):
