@@ -134,7 +134,7 @@ class GenreViewSet(ListCreateDeleteViewSet):
 class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для произведения."""
     queryset = Title.objects.all().annotate(
-        Avg('reviews__score')).order_by('name')
+        rating=Avg('reviews__score')).order_by('name')
     permission_classes = (IsAdminOrReadOnly,)
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter)
@@ -156,15 +156,21 @@ class ReviewViewSet(viewsets.ModelViewSet):
     ]
     pagination_class = LimitOffsetPagination
 
+    def get_title(self):
+        return get_object_or_404(
+            Title,
+            id=int(self.kwargs.get('title_id'))
+        )
+
     def get_queryset(self):
-        title = get_object_or_404(Title, id=int(self.kwargs.get('title_id')))
-        queryset = Review.objects.filter(title_id=title.id)
+        queryset = self.get_title().reviews.all()
         return queryset
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, id=int(self.kwargs.get('title_id')))
-        user = get_object_or_404(User, username=self.request.user.username)
-        serializer.save(author=user, title_id=title.id)
+        serializer.save(
+            author=self.request.user,
+            title_id=self.get_title().id
+        )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -176,17 +182,17 @@ class CommentViewSet(viewsets.ModelViewSet):
     ]
     pagination_class = LimitOffsetPagination
 
-    def get_queryset(self):
-        review = get_object_or_404(
+    def get_review(self):
+        return get_object_or_404(
             Review,
             id=int(self.kwargs.get('review_id'))
         )
-        queryset = Comment.objects.filter(review_id=review.id)
-        return queryset
+
+    def get_queryset(self):
+        return self.get_review().comments.all()
 
     def perform_create(self, serializer):
-        review = get_object_or_404(
-            Review,
-            id=int(self.kwargs.get('review_id'))
+        serializer.save(
+            author=self.request.user,
+            review_id=self.get_review().id
         )
-        serializer.save(author=self.request.user, review_id=review.id)

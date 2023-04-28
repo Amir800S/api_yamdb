@@ -1,5 +1,3 @@
-from statistics import mean
-
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import UniqueConstraint
@@ -34,7 +32,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         fields = (
@@ -48,16 +46,6 @@ class TitleReadSerializer(serializers.ModelSerializer):
         )
         model = Title
         read_only_fields = ('rating',)
-
-    def get_rating(self, obj):
-        reviews = Review.objects.filter(title_id=obj.id)
-        scores = []
-        for review in reviews:
-            scores.append(review.score)
-        if len(scores) > 0:
-            return mean(scores)
-        else:
-            return None
 
 
 class TitleWriteSerializer(TitleReadSerializer):
@@ -175,14 +163,17 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['id', 'author', 'title', 'pub_date']
 
-    def validate_author(self, value):
-        request = self.context.get("request")
-        title = get_object_or_404(
-            Title,
-            id=int(self.context.get("view").kwargs.get('title_id'))
-        )
-        if request and hasattr(request, "user"):
-            user = request.user
-        if Review.objects.filter(author=user, title=title).exists():
-            raise ValidationError("Вы уже оставили отзыв на это произведение.")
-        return value
+    def validate(self, data):
+        if self.context.get('view').action == 'create':
+            request = self.context.get('request')
+            title = get_object_or_404(
+                Title,
+                id=int(self.context.get('view').kwargs.get('title_id'))
+            )
+            if request and hasattr(request, 'user'):
+                user = request.user
+            if Review.objects.filter(author=user, title=title).exists():
+                raise ValidationError(
+                    {'Вы уже оставили отзыв на это произведение.'}
+                )
+        return data
