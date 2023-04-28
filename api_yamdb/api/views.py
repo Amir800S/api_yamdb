@@ -3,10 +3,11 @@ from http import HTTPStatus
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, viewsets, serializers
+from rest_framework import filters, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (IsAuthenticated,
@@ -15,7 +16,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from reviews.models import Category, Genre, Review, Title, User
 from .filters import TitleFilter
 from .mixins import ListCreateDeleteViewSet
 from .permissions import (IsAdmin, IsAdminOrReadOnly,
@@ -25,6 +25,7 @@ from .serializers import (AdminSerializer, CategorySerializer,
                           RegistrationSerializer, ReviewSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
                           TokenConfirmationSerializer, UserSerializer)
+from reviews.models import Category, Genre, Review, Title, User
 
 
 class UserCreation(APIView):
@@ -47,22 +48,15 @@ class UserCreation(APIView):
         serializer = RegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        if not User.objects.filter(
-            username=data['username'], email=data['email']
-        ):
-            if User.objects.filter(username=data['username']):
-                raise serializers.ValidationError('Никнейм уже существует!')
-            if User.objects.filter(email=data['email']):
-                raise serializers.ValidationError('Email уже существует!')
         try:
             signed_user, created = User.objects.get_or_create(
                 username=data.get('username'),
                 email=data.get('email')
             )
-        except User.DoesNotExist:
+        except IntegrityError:
             return Response(
                 settings.EMAIL_EXISTS_MESSAGE if
-                User.objects.filter(email='email').exists()
+                User.objects.filter(username='username').exists()
                 else settings.USERNAME_EXISTS_MESSAGE,
                 status=HTTPStatus.BAD_REQUEST
             )
@@ -165,12 +159,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def get_title(self):
         return get_object_or_404(
             Title,
-            id=int(self.kwargs.get('title_id'))
+            id=self.kwargs.get('title_id')
         )
 
     def get_queryset(self):
-        queryset = self.get_title().reviews.all()
-        return queryset
+        return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
         serializer.save(
@@ -191,7 +184,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_review(self):
         return get_object_or_404(
             Review,
-            id=int(self.kwargs.get('review_id'))
+            id=self.kwargs.get('review_id')
         )
 
     def get_queryset(self):
