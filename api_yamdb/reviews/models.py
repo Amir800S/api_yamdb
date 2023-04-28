@@ -154,78 +154,70 @@ class User(AbstractUser):
         return 'Пользователь - {}'.format(self.username)
 
 
-class Review(models.Model):
-    """Модель отзыва."""
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='ID произведения',
-    )
-    author = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Автор отзыва',
-    )
+class ContentMeta:
+    ordering = ['pub_date']
+
+
+class Content(models.Model):
+    """Базовый класс для Ревью и комментов."""
     text = models.TextField(
         blank=False,
         null=False,
-        verbose_name='Текст отзыва',
-    )
-    score = models.IntegerField(
-        blank=False,
-        null=False,
-        verbose_name='Оценка',
-        validators=[
-            MaxValueValidator(10),
-            MinValueValidator(1)
-        ]
+        verbose_name='Текст',
     )
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации',
         auto_now_add=True
     )
-
-    class Meta:
-        verbose_name = 'Review'
-        verbose_name_plural = 'Reviews'
-        ordering = ['pub_date']
 
     def __str__(self):
         return self.text[:30]
 
 
-class Comment(models.Model):
+class Review(Content):
+    """Модель отзыва."""
+    author = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
+    )
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name='Произведение',
+    )
+    score = models.SmallIntegerField(
+        blank=False,
+        null=False,
+        verbose_name='Оценка',
+        validators=[
+            MaxValueValidator(10, "Оценка не должна больше 10."),
+            MinValueValidator(1, "Оценка не должна меньше 1.")
+        ]
+    )
+
+    class Meta(ContentMeta):
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        default_related_name = 'reviews'
+
+
+class Comment(Content):
     """Модель Комменты."""
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
+    )
     review = models.ForeignKey(
         Review,
         blank=False,
         null=False,
         on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Комментарий',
-    )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Автор комментария',
-    )
-    text = models.TextField(
-        blank=False,
-        null=False,
-        verbose_name='Текст комментария',
-    )
-    pub_date = models.DateTimeField(
-        verbose_name='Дата публикации',
-        auto_now_add=True
+        verbose_name='Комментарии',
     )
 
-    class Meta:
-        verbose_name = 'Comment'
-        verbose_name_plural = 'Comments'
-        ordering = ['pub_date']
-
-    def __str__(self):
-        return self.text[:15]
+    class Meta(ContentMeta):
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        default_related_name = 'comments'
