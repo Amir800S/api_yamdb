@@ -191,6 +191,11 @@ class Review(models.Model):
         verbose_name = 'Review'
         verbose_name_plural = 'Reviews'
         ordering = ['pub_date']
+        constraints = [
+            models.UniqueConstraint(
+                fields=('title', 'author', ),
+                name='unique review'
+            )]
 
     def __str__(self):
         return self.text[:30]
