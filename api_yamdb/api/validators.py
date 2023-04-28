@@ -14,7 +14,7 @@ def validate_username(value):
 
 def validate_regex_username(value):
     """Проверка на отсутсвие запрещенных символов."""
-    regex = re.compile(r'^[\w.@+-]+\Z')
+    regex = re.compile(r'^[\w.@+-]+$')
     regex_matches = re.search(regex, value)
     if not regex_matches:
         regex_pattern = re.compile(r'^[\w.@+-]')
