@@ -7,7 +7,7 @@ from api.validators import validate_regex_username, validate_username
 from .validators import valid_year
 
 
-class BaseModel(models.Model):
+class NameSlug(models.Model):
     """Абстрактный родительский класс для моделей категория и жанр."""
     name = models.CharField(max_length=settings.TEXT_LENGTH,
                             unique=True,
@@ -28,18 +28,18 @@ class BaseModel(models.Model):
         return self.name
 
 
-class Category(BaseModel):
+class Category(NameSlug):
     """Модель категория."""
 
-    class Meta(BaseModel.Meta):
+    class Meta(NameSlug.Meta):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
 
-class Genre(BaseModel):
+class Genre(NameSlug):
     """Модель жанр."""
 
-    class Meta(BaseModel.Meta):
+    class Meta(NameSlug.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
@@ -81,13 +81,13 @@ class Title(models.Model):
 
 class GenreTitle(models.Model):
     """Класс для объединения жанров и произведений."""
-    genre_id = models.ForeignKey(
+    genre = models.ForeignKey(
         Genre,
         on_delete=models.CASCADE,
         verbose_name='ID жанра'
     )
 
-    title_id = models.ForeignKey(
+    title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         verbose_name='ID произведения'
@@ -154,12 +154,10 @@ class User(AbstractUser):
         return f'Пользователь - {self.username}'
 
 
-class ContentMeta:
-    ordering = ['pub_date']
-
-
-class Content(models.Model):
+class PublicAuthor(models.Model):
     """Базовый класс для Ревью и комментов."""
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name='Автор')
     text = models.TextField(
         blank=False,
         null=False,
@@ -170,17 +168,16 @@ class Content(models.Model):
         auto_now_add=True
     )
 
+    class Meta:
+        abstract = True
+        ordering = ('pub_date',)
+
     def __str__(self):
         return self.text[:30]
 
 
-class Review(Content):
+class Review(PublicAuthor):
     """Модель отзыва."""
-    author = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='Автор',
-    )
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -196,13 +193,19 @@ class Review(Content):
         ]
     )
 
-    class Meta(ContentMeta):
+    class Meta(PublicAuthor.Meta):
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_author_review'
+            )
+        ]
+        default_related_name = 'reviews'
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
-        default_related_name = 'reviews'
 
 
-class Comment(Content):
+class Comment(PublicAuthor):
     """Модель Комменты."""
     author = models.ForeignKey(
         User,
@@ -217,7 +220,7 @@ class Comment(Content):
         verbose_name='Комментарии',
     )
 
-    class Meta(ContentMeta):
+    class Meta(PublicAuthor.Meta):
+        default_related_name = 'comments'
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        default_related_name = 'comments'
