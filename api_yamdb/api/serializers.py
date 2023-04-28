@@ -5,8 +5,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from reviews.models import Category, Comment, Genre, Review, Title, User
 from .validators import validate_regex_username, validate_username
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -115,7 +115,8 @@ class TokenConfirmationSerializer(serializers.Serializer):
 class RegistrationSerializer(serializers.Serializer):
     """Сериалайзер для регистрации пользователя."""
     email = serializers.EmailField(required=True,
-                                   max_length=settings.EMAIL_MAX_LENGHT,)
+                                   max_length=settings.EMAIL_MAX_LENGHT,
+                                   )
     username = serializers.CharField(required=True,
                                      max_length=settings.USERNAME_MAX_LENGHT,
                                      validators=(
