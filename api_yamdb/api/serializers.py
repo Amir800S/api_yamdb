@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import UniqueConstraint
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
@@ -57,6 +58,17 @@ class TitleWriteSerializer(TitleReadSerializer):
     category = serializers.SlugRelatedField(queryset=Category.objects.all(),
                                             slug_field='slug',
                                             )
+
+    def validate(self, data):
+        if 'year' in data.keys():
+            if data.get('year') > timezone.now().year:
+                raise serializers.ValidationError(
+                    'Год не может быть больше текущего!'
+                )
+        return data
+
+    def to_representation(self, instance):
+        return TitleReadSerializer(instance).data
 
 
 class AdminSerializer(serializers.ModelSerializer):
