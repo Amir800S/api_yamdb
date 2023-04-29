@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db.models import UniqueConstraint
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
@@ -175,15 +174,14 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'author', 'title', 'pub_date']
 
     def validate(self, data):
-        if self.context.get('view').action == 'create':
-            request = self.context.get('request')
-            title = get_object_or_404(
-                Title,
-                id=int(self.context.get('view').kwargs.get('title_id'))
-            )
+        request = self.context.get('request')
+        if request.method == 'POST':
             if request and hasattr(request, 'user'):
                 user = request.user
-            if Review.objects.filter(author=user, title=title).exists():
+            if Review.objects.filter(
+                author=user,
+                title=self.context.get('view').kwargs.get('title_id')
+            ).exists():
                 raise ValidationError(
                     {'Вы уже оставили отзыв на это произведение.'}
                 )
