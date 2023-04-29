@@ -207,11 +207,6 @@ class Review(PublicAuthor):
 
 class Comment(PublicAuthor):
     """Модель Комменты."""
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name='Автор',
-    )
     review = models.ForeignKey(
         Review,
         blank=False,
