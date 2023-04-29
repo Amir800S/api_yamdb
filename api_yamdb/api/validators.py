@@ -14,13 +14,11 @@ def validate_username(value):
 
 def validate_regex_username(value):
     """Проверка на отсутсвие запрещенных символов."""
-    regex = re.compile(r'^[\w.@+-]+$')
-    regex_matches = re.search(regex, value)
-    if not regex_matches:
-        regex_pattern = re.compile(r'^[\w.@+-]')
-        forbidden_symbols = re.sub(regex_pattern, '', value)
+    forbidden_symbols = re.sub(r'^[\w.@+-]+$', '', value)
+    message = set(''.join(forbidden_symbols))
+    if forbidden_symbols:
         raise ValidationError(
-            f'Некорректный символ для никнейма: {forbidden_symbols}'
+            f'Некорректный символ для никнейма: {message}'
             f' Только буквы, цифры и @/./+/-/_'
         )
     return value
