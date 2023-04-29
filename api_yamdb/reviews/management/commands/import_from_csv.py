@@ -1,9 +1,9 @@
 import csv
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError
 
-import api_yamdb.settings
 from reviews.models import (Category, Comment, Genre,
                             Review, Title, User, GenreTitle)
 
@@ -46,7 +46,7 @@ class Command(BaseCommand):
             self.stdout.write('База данных успешно очищена.')
         else:
             for model, csv_file in CSV_FILES.items():
-                file = f'{api_yamdb.settings.BASE_DIR}/static/data/{csv_file}'
+                file = f'{settings.BASE_DIR}/static/data/{csv_file}'
                 with open(f'{file}',
                           'r', encoding='utf8') as file:
                     for row in csv.DictReader(file, delimiter=','):
